@@ -39,6 +39,8 @@ class Flutterwave(object):
 
     def pay_via_card(self, data):
 
+        data.update({'PBFPubKey': self.public_key})
+
         # hash the secret key with the get hashed key function
         hashed_sec_key = self.get_key(self.secret_key)
 
@@ -63,7 +65,7 @@ class Flutterwave(object):
 
         response = requests.post(endpoint, headers=headers, data=json.dumps(payload))
 
-        print(response.json())
+        return response.json()
 
     def validate_payment(self, transaction_reference, otp):
         data = {
@@ -79,4 +81,35 @@ class Flutterwave(object):
         }
 
         response = requests.post(endpoint, headers=headers, data=json.dumps(data))
-        print(response.json())
+
+        return response.json()
+
+    def transfer_to_bank(self, data):
+
+        data.update({'seckey': self.secret_key})
+
+        endpoint = "https://api.ravepay.co/v2/gpx/transfers/create"
+
+        # set the content type to application/json
+        headers = {
+            'content-type': 'application/json',
+        }
+
+        response = requests.post(endpoint, headers=headers, data=json.dumps(data))
+
+        return response.json()
+
+    def validate_transfer_to_bank(self, reference):
+
+        url = "https://api.ravepay.co/v2/gpx/transfers"
+
+        querystring = {
+            "seckey": self.secret_key,
+            "reference": reference
+        }
+
+        headers = {'content-type': 'application/json'}
+
+        response = requests.request("GET", url, headers=headers, params=querystring)
+
+        return response.json()

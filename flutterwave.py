@@ -67,7 +67,7 @@ class Flutterwave(object):
 
         return response.json()
 
-    def validate_payment(self, transaction_reference, otp):
+    def validate_payment_with_card(self, transaction_reference, otp):
         data = {
             "PBFPubKey": self.public_key,
             "transaction_reference": transaction_reference,
@@ -99,7 +99,7 @@ class Flutterwave(object):
 
         return response.json()
 
-    def validate_transfer_to_bank(self, reference):
+    def check_transfer_to_bank(self, reference):
 
         url = "https://api.ravepay.co/v2/gpx/transfers"
 

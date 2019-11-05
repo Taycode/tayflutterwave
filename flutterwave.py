@@ -1,4 +1,6 @@
-import os, hashlib, warnings, requests, json
+import hashlib
+import requests
+import json
 import base64
 from Crypto.Cipher import DES3
 
@@ -60,15 +62,16 @@ class Flutterwave(object):
         }
 
         response = requests.post(endpoint, headers=headers, data=json.dumps(payload))
+
         print(response.json())
 
-    def validate_payment(self, ref_key, otp):
+    def validate_payment(self, transaction_reference, otp):
         data = {
             "PBFPubKey": self.public_key,
-            "transaction_reference": "FLW-MOCK-744927fe5cae22fddef891d1ee14ac7b",
-            "otp": "181971713"
+            "transaction_reference": transaction_reference,
+            "otp": otp
         }
-        endpoint = "https://api.ravepay.co/flwv3-pug/getpaidx/api/charge"
+        endpoint = "https://api.ravepay.co/flwv3-pug/getpaidx/api/validatecharge"
 
         # set the content type to application/json
         headers = {
@@ -77,5 +80,3 @@ class Flutterwave(object):
 
         response = requests.post(endpoint, headers=headers, data=json.dumps(data))
         print(response.json())
-
-

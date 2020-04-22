@@ -12,8 +12,11 @@ from tay_flutterwave import Flutterwave
 secret_key = 'abcdefgh'
 public_key = 'ijklmnop'
 
-#Your Flutterwave Instance
-pay_object = Flutterwave(public_key, secret_key)
+# Your Flutterwave Instance
+# set live=False to use ravepay sandbox account, defaults to True
+pay_object = Flutterwave(public_key, secret_key, live=False)
+
+
 
 data = {
             "cardno": "2121212121", #Required

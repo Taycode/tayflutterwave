@@ -8,12 +8,16 @@ from Crypto.Cipher import DES3
 class Flutterwave(object):
     """this is the getKey function that generates an encryption Key for you by passing your Secret Key as a parameter"""
 
-    def __init__(self, public_key, secret_key):
+    def __init__(self, public_key, secret_key, live=True):
         self.public_key = public_key
         self.secret_key = secret_key
+        self.base_url = 'https://api.ravepay.co'
+        # if not live set base_url to RavePay sandbox url
+        if not live:
+            self.base_url = 'https://ravesandboxapi.flutterwave.com'
 
     @staticmethod
-    def get_key(secret_key):
+    def __get_key(secret_key):
         hashed_secret_key = hashlib.md5(secret_key.encode("utf-8")).hexdigest()
         hashed_secret_key_last_12 = hashed_secret_key[-12:]
         secret_key_adjusted = secret_key.replace('FLWSECK-', '')
@@ -22,7 +26,7 @@ class Flutterwave(object):
 
     """This is the encryption function that encrypts your payload by passing the text and your encryption Key."""
     @staticmethod
-    def encrypt_data(key, plain_text):
+    def __encrypt_data(key, plain_text):
         block_size = 8
         pad_diff = block_size - (len(plain_text) % block_size)
         cipher = DES3.new(key, DES3.MODE_ECB)
@@ -42,11 +46,11 @@ class Flutterwave(object):
         data.update({'PBFPubKey': self.public_key})
 
         # hash the secret key with the get hashed key function
-        hashed_sec_key = self.get_key(self.secret_key)
+        hashed_sec_key = self.__get_key(self.secret_key)
 
         # encrypt the hashed secret key and payment parameters with the encrypt function
 
-        encrypt_key = self.encrypt_data(hashed_sec_key, json.dumps(data))
+        encrypt_key = self.__encrypt_data(hashed_sec_key, json.dumps(data))
 
         # payment payload
         payload = {
@@ -56,14 +60,9 @@ class Flutterwave(object):
         }
 
         # card charge endpoint
-        endpoint = "https://api.ravepay.co/flwv3-pug/getpaidx/api/charge"
+        endpoint = self.base_url + "/flwv3-pug/getpaidx/api/charge"
 
-        # set the content type to application/json
-        headers = {
-            'content-type': 'application/json',
-        }
-
-        response = requests.post(endpoint, headers=headers, data=json.dumps(payload))
+        response = requests.post(endpoint, json=payload)
 
         return response.json()
 
@@ -73,14 +72,9 @@ class Flutterwave(object):
             "transaction_reference": transaction_reference,
             "otp": otp
         }
-        endpoint = "https://api.ravepay.co/flwv3-pug/getpaidx/api/validatecharge"
+        endpoint = self.base_url + "/flwv3-pug/getpaidx/api/validatecharge"
 
-        # set the content type to application/json
-        headers = {
-            'content-type': 'application/json',
-        }
-
-        response = requests.post(endpoint, headers=headers, data=json.dumps(data))
+        response = requests.post(endpoint, json=data)
 
         return response.json()
 
@@ -88,28 +82,21 @@ class Flutterwave(object):
 
         data.update({'seckey': self.secret_key})
 
-        endpoint = "https://api.ravepay.co/v2/gpx/transfers/create"
+        endpoint = self.base_url + "/v2/gpx/transfers/create"
 
-        # set the content type to application/json
-        headers = {
-            'content-type': 'application/json',
-        }
-
-        response = requests.post(endpoint, headers=headers, data=json.dumps(data))
+        response = requests.post(endpoint, json=data)
 
         return response.json()
 
     def check_transfer_to_bank(self, reference):
 
-        url = "https://api.ravepay.co/v2/gpx/transfers"
+        endpoint = self.base_url + "/v2/gpx/transfers"
 
         querystring = {
             "seckey": self.secret_key,
             "reference": reference
         }
 
-        headers = {'content-type': 'application/json'}
-
-        response = requests.request("GET", url, headers=headers, params=querystring)
+        response = requests.get(endpoint, data=querystring)
 
         return response.json()

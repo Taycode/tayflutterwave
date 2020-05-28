@@ -7,7 +7,7 @@
  ### Pay With Card
  
  ```python
-from tay_flutterwave import Flutterwave
+from tayflutterwave import Flutterwave
 
 secret_key = 'abcdefgh'
 public_key = 'ijklmnop'

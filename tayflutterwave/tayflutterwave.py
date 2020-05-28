@@ -78,6 +78,18 @@ class Flutterwave(object):
 
         return response.json()
 
+    def verify_payment_with_card(self, txref):
+
+        endpoint = self.base_url + "/flwv3-pug/getpaidx/api/v2/verify"
+
+        data = {
+            "txref": txref,
+            "SECKEY": self.secret_key
+        }
+
+        response = requests.post(endpoint, json=data)
+        return response.json()
+
     def transfer_to_bank(self, data):
 
         data.update({'seckey': self.secret_key})
